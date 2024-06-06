@@ -1,0 +1,106 @@
+﻿@page "/computadoras-crear"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Computadoras</h3>
+
+
+<EditForm Model="@computadora" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="NumSerie">Numero de Serie</label>
+        <InputText id="NumSerie" @bind-Value="computadora.NumSerie" class="form-control" />
+        <ValidationMessage For="() => computadora.NumSerie" />
+    </div>
+    <div class="form-group">
+        <label for="Modelo">Modelo</label>
+        <InputText id="Modelo" @bind-Value="computadora.Modelo" class="form-control" />
+        <ValidationMessage For="() => computadora.Modelo" />
+    </div>
+    <div class="form-group">
+        <label for="Marca">Marca</label>
+        <InputText id="Marca" @bind-Value="computadora.Marca" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Almacenamiento">Almacenamiento</label>
+        <InputText id="Almacenamiento" @bind-Value="computadora.Almacenamiento" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Ram">Numero de Ejemplar</label>
+        <InputText id="Ram" @bind-Value="computadora.Ram" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar Datos</button>
+    </div>
+</EditForm>
+
+@if (computadoras != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>NumSerie</th>
+                <th>Modelo</th>
+                <th>Marca</th>
+                <th>Almacenamiento</th>
+                <th>Ram</th>
+                <th>Eliminar</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var computadora in computadoras)
+            {
+                <tr>
+                    <td>@computadora.NumSerie</td>
+                    <td>@computadora.Modelo</td>
+                    <td>@computadora.Marca</td>
+                    <td>@computadora.Almacenamiento</td>
+                    <td>@computadora.Ram</td>
+                    <td>
+                        <button class="btn btn-danger"
+                                @onclick="@(() => BorrarRevista(computadora.Almacenamiento))">
+                            Eliminar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/computadoras-editar/{computadora.Almacenamiento}"))">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Computadoras computadora = new Computadoras();
+    List<Computadoras> computadoras = new List<Computadoras>();
+
+    protected async Task Guardar()
+    {
+        computadoras.Add(computadora);
+
+        await localStorage.SetItemAsync("computadoras", computadoras);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        computadoras = await localStorage.GetItemAsync<List<Computadoras>>("computadoras");
+        if (computadoras == null)
+            computadoras = new List<Computadoras>();
+    }
+
+    protected async Task BorrarRevista(string Almacenamiento)
+    {
+        computadoras.Remove(computadoras.First(c => c.Almacenamiento == Almacenamiento));
+        await localStorage.SetItemAsync("computadoras", computadoras);
+
+    }
+}
